@@ -3,16 +3,15 @@ package tinyconf
 import (
 	"errors"
 	"fmt"
+	"github.com/insei/fmap/v2"
 	"reflect"
 	"strings"
-
-	"github.com/insei/fmap/v3"
 )
 
 type Manager struct {
 	drivers    []Driver
 	log        Logger
-	registered map[reflect.Type]fmap.Storage
+	registered map[reflect.Type]map[string]fmap.Field
 }
 
 func checkConfig(conf any) error {
@@ -31,14 +30,10 @@ func checkConfig(conf any) error {
 }
 
 func (c *Manager) Register(conf any) error {
-	err := checkConfig(conf)
-	if err != nil {
+	if err := checkConfig(conf); err != nil {
 		return fmt.Errorf("config can't be registred: %w", err)
 	}
-	c.registered[reflect.TypeOf(conf)], err = fmap.GetFrom(conf)
-	if err != nil {
-		return fmt.Errorf("config can't be registred: %w", err)
-	}
+	c.registered[reflect.TypeOf(conf)] = fmap.GetFrom(conf)
 	return nil
 }
 
@@ -64,13 +59,12 @@ func getLoggerValue(field fmap.Field, val any) string {
 
 func (c *Manager) Parse(conf any) error {
 	confTypeOf := reflect.TypeOf(conf)
-	storage, ok := c.registered[confTypeOf]
+	fields, ok := c.registered[confTypeOf]
 	if !ok {
 		return ErrNotRegisteredConfig
 	}
 	for _, d := range c.drivers {
-		for _, path := range storage.GetAllPaths() {
-			field := storage.MustFind(path)
+		for path, field := range fields {
 			if field.GetType().Kind() == reflect.Struct {
 				continue
 			}
@@ -101,7 +95,7 @@ func (c *Manager) Parse(conf any) error {
 }
 
 func New(opts ...Option) (*Manager, error) {
-	m := &Manager{log: &noopLogger{}, registered: map[reflect.Type]fmap.Storage{}}
+	m := &Manager{log: &noopLogger{}, registered: map[reflect.Type]map[string]fmap.Field{}}
 	count := countDrivers(opts...)
 	if count > 0 {
 		m.drivers = make([]Driver, 0, count)

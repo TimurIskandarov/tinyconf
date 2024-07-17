@@ -11,7 +11,6 @@ require (
 
 require (
 	github.com/insei/cast v1.1.1 // indirect
-	github.com/insei/fmap/v3 v3.0.0 // indirect
-	github.com/insei/tinyconf v1.0.2 // indirect
+	github.com/insei/fmap/v2 v2.0.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

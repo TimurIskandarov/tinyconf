@@ -3,9 +3,10 @@ package tag
 import (
 	"fmt"
 
-	"github.com/insei/cast"
-	"github.com/insei/fmap/v3"
 	"github.com/insei/tinyconf"
+
+	"github.com/insei/cast"
+	"github.com/insei/fmap/v2"
 )
 
 type defaultTagDriver struct {
@@ -30,18 +31,6 @@ func (d defaultTagDriver) GetValue(field fmap.Field) (*tinyconf.Value, error) {
 
 func (d defaultTagDriver) GetName() string {
 	return d.name
-}
-
-func (d defaultTagDriver) Doc(storage fmap.Storage) string {
-	doc := ""
-	for _, path := range storage.GetAllPaths() {
-		tags := storage.MustFind(path).GetTag()
-		if tag, ok := tags.Lookup(d.name); ok {
-			doc += fmt.Sprintf("#%s\n%s=", tags.Get("doc"), tag)
-		}
-	}
-	fmt.Println(doc)
-	return doc
 }
 
 func New(tagName string) (tinyconf.Driver, error) {

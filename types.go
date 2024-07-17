@@ -2,8 +2,7 @@ package tinyconf
 
 import (
 	"fmt"
-
-	"github.com/insei/fmap/v3"
+	"github.com/insei/fmap/v2"
 )
 
 var (
